@@ -1,0 +1,10 @@
+---
+- name: checking 
+  debug:
+    msg: "We are here we are Waiting"
+
+- name: openvpn view
+  shell: /usr/bin/ps -ef | grep openvpn
+  register: ps
+
+- debug: var=ps.stdout_lines
