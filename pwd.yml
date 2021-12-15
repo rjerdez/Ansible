@@ -1,0 +1,84 @@
+---
+  - name: hostname
+    hosts: 127.0.0.1
+    connection: local
+    tasks:
+    - name: command execution pwd
+      command: /usr/bin/pwd
+      register: proceso
+    - debug: var=proceso.stdout_lines
+
+    - name: Show results
+      debug:
+        var: result.stdout
+    
+    - name: directory creation
+      file: 
+        path: /home/roger/Documents/ansiblepwd
+        state: directory
+        owner: roger
+        group: roger
+        mode: 0755
+    
+    - name: create 'testfile' 
+      file:
+          path: /home/roger/Documents/ansiblepwd/testfile
+          state: touch
+      register: p
+      changed_when: 
+          p.diff.before.state == "absent"
+      
+    - name: agregar linea en testfile
+      lineinfile:
+        dest: /home/roger/Documents/ansiblepwd/testfile
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+      with_items:
+        - { regexp: '^kernel.shmall', line: 'kernel.shmall = 2097152' }
+        - { regexp: '^kernel.shmmax', line: 'kernel.shmmax = 134217728' }
+        - { regexp: '^fs.file-max', line: 'fs.file-max = 65536' }
+      # Syslogtest file creation
+    - name: create 'syslogtest' 
+      file:
+          path: /home/roger/Documents/ansiblepwd/syslogtest
+          state: touch
+      register: p
+      changed_when: 
+          p.diff.before.state == "absent"
+      # Insert line after the last one 
+    - name: agregar linea en syslogtest
+      lineinfile:
+        path: /home/roger/Documents/ansiblepwd/syslogtest
+        regexp: '^10.0.0.7'
+        state: present
+        insertafter: EOF
+        #insert TAB between err and ip
+        line: "*err\t\t @10.0.0.8"
+        backup: yes
+    
+    # CREATE LOG FILES SIMULATE MESSAGES
+    - name: create 'testfile' 
+      file:
+          path: /home/roger/Documents/ansiblepwd/messages
+          state: touch
+      register: p
+      changed_when: 
+          p.diff.before.state == "absent"
+      
+    - name: agregar linea en messages
+      lineinfile:
+        dest: /home/roger/Documents/ansiblepwd/messages
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+      with_items:
+        - { regexp: '^err ssh', line: 'ssh error' }
+        - { regexp: '^warn error ', line: 'warn connection ' }
+        - { regexp: '^error file', line: 'file-max = 65536' } 
+
+  - name: checa
+    hosts: 127.0.0.1
+    tasks:
+      - name: Play 1 - Task 1
+        debug:
+          msg: "Play 1 - Task 1"
+      - include: task1.yml
