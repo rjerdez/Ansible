@@ -1,0 +1,14 @@
+---
+- hosts: all
+  connection: ssh
+  gather_facts: true
+  tasks:
+  - name: Lookup ansible_hostname in getent database
+    command: getent hosts {{ ansible_hostname }}
+    delegate_to: localhost
+    register: result
+
+  - name: Show results
+    debug:
+      var: result.stdout
+    delegate_to: localhost

@@ -1,0 +1,26 @@
+---
+  - name: gzip messages files
+    hosts: 127.0.0.1
+    tasks:
+      - name: check messages files en var adm
+        shell: ls -ltr /home/roger/Documents/ansiblepwd/ | awk '{print $9}'  | grep -v gz  |grep messages | grep [0-9] > /home/roger/Documents/ansiblepwd/messages.txt
+        register: messages
+        
+      - debug: var=messages.stdout_lines
+
+      - name: gzip messages files 
+        shell: for i in `cat /home/roger/Documents/ansiblepwd/messages.txt`; do /usr/bin/gzip /home/roger/Documents/ansiblepwd/$i; done
+        register: zipp
+        
+      - debug: var=zipp.stdout_lines
+
+      - name: remove txt file
+        state: absent 
+        shell: /usr/bin/rm /home/roger/Documents/ansiblepwd/messages.txt
+        register: output
+        
+      - debug: var=output
+      
+      
+
+      
